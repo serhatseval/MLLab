@@ -11,17 +11,20 @@ def plot_spectogram(signal, signal_rate, outputpath):
     spectogram = np.abs(stft)
     spectogram_db = librosa.amplitude_to_db(spectogram)
     plt.figure(figsize=(14, 5))
-    img = librosa.display.specshow(spectogram_db, sr=signal_rate, x_axis= 'time', y_axis='log', cmap='inferno')
+    img = librosa.display.specshow(spectogram_db, sr=signal_rate, x_axis= 'time', y_axis='log', cmap='Grays')
     outputpath.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     plt.savefig(outputpath / f'spectogram_{timestamp}.png')
     plt.show()
-
+    return spectogram_db
 
 def main(audiofile): 
     signal, signal_rate = sf.read(audiofile)
     print(f"Signal Rate: {signal_rate}")
-    plot_spectogram(signal, signal_rate, pl.Path('OutputFiles/'))
+    spectrogram_db = plot_spectogram(signal, signal_rate, pl.Path('OutputFiles/'))
+    print(f"Audio Duration: {len(signal)/signal_rate:.2f} seconds")
+    print(f"Spectrogram Shape: {spectrogram_db.shape}")
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Plot Spectogram')
