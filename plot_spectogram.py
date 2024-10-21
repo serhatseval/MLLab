@@ -19,8 +19,7 @@ def plot_spectogram(signal, signal_rate, outputpath):
     plt.show()
     return spectogram_db
 
-file_path = "C:\\Users\Marcel\Desktop\IML\daps\daps\ipad_confroom1\\f2_script1_ipad_confroom1.wav"
-def main():
+def main(file_path):
     print(f"Original audio duration: {librosa.get_duration(path=file_path)} seconds")
     signal, signal_rate = sf.read(file_path, frames=0)
     signal, signal_rate = sf.read(file_path, start=5*signal_rate, stop=15*signal_rate)
@@ -31,7 +30,7 @@ def main():
 
 
 if __name__ == '__main__':
-    #parser = argparse.ArgumentParser(description='Plot Spectogram')
-    #parser.add_argument('audiofile', type=str, help='Path to the audio file')
-    #args = parser.parse_args()
-    main()
+    parser = argparse.ArgumentParser(description='Plot Spectogram')
+    parser.add_argument('audiofile', type=str, help='Path to the audio file')
+    args = parser.parse_args()
+    main(args.audiofile)
