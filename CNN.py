@@ -7,13 +7,13 @@ from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
-annotations_file = '.\..\..\\testData\labels.csv'
-img_dir = '.\..\..\\testData\images'
-img_size = 20
-img_height = 1600
-img_width = 1000
+annotations_file = 'OutputFiles/labels.csv'
+img_dir = '.\\OutputFiles\\images'
+img_height = 1025
+img_width = 862
 features = 2
-batch_size = 2
+batch_size = 128
+
 
 class CustomImageDataset(Dataset):
     def __init__(self, annotations_file, img_dir, transform=None, target_transform=None):
@@ -35,11 +35,13 @@ class CustomImageDataset(Dataset):
             label = self.target_transform(label)
         return image, label
 
+print("Defining Dataset")
 training_data = CustomImageDataset(annotations_file, img_dir, transform=transforms.ConvertImageDtype(torch.float32),
                                    target_transform=None)
 test_data = CustomImageDataset(annotations_file, img_dir, transform=transforms.ConvertImageDtype(torch.float32),
                                target_transform=None)
 
+print("Creating DataLoader")
 # Create data loaders.
 train_dataloader = DataLoader(training_data, batch_size=batch_size)
 test_dataloader = DataLoader(test_data, batch_size=batch_size)
@@ -59,6 +61,7 @@ device = (
 )
 print(f"Using {device} device")
 
+
 # Define model
 class NeuralNetwork(nn.Module):
     def __init__(self):
@@ -75,11 +78,13 @@ class NeuralNetwork(nn.Module):
         logits = self.linear_relu_stack(x)
         return logits
 
+
 model = NeuralNetwork().to(device)
 print(model)
 
 loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
+
 
 def train(dataloader, model, loss_fn, optimizer):
     size = len(dataloader.dataset)
@@ -100,6 +105,7 @@ def train(dataloader, model, loss_fn, optimizer):
             loss, current = loss.item(), (batch + 1) * len(X)
             print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
 
+
 def test(dataloader, model, loss_fn):
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
@@ -114,6 +120,7 @@ def test(dataloader, model, loss_fn):
     test_loss /= num_batches
     correct /= size
     print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
+
 
 epochs = 5
 for t in range(epochs):
