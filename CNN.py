@@ -143,10 +143,12 @@ if __name__ == "__main__":
         print(f"Epoch {t + 1}\n-------------------------------")
         train(train_dataloader, model, loss_fn, optimizer)
         print(
-            f"Epoch {t + 1} training finished after {(datetime.datetime.now() - start).total_seconds() // 60} minutes from start")
+            f"Epoch {t + 1} training finished after {(datetime.datetime.now() - start).total_seconds() // 60}"
+            f"minutes from start")
         test(test_dataloader, model, loss_fn)
         print(
-            f"Epoch {t + 1} testing finished after {(datetime.datetime.now() - start).total_seconds() // 60} minutes from start")
+            f"Epoch {t + 1} testing finished after {(datetime.datetime.now() - start).total_seconds() // 60}"
+            f"minutes from start")
         torch.save(model.state_dict(), f"OutputFiles/model{t + 1}.pth")
         print("Saved!")
     print("Done!")

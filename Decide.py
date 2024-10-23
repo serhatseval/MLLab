@@ -1,5 +1,6 @@
 import torch
 from torchvision.io import read_image, ImageReadMode
+from torchvision import transforms
 from CNN import NeuralNetwork
 
 device = ("cuda" if torch.cuda.is_available()
@@ -18,5 +19,6 @@ def decide(image_path, model):
     x = read_image(image_path, mode=ImageReadMode.GRAY)
     with torch.no_grad():
         x = x.to(device)
+        x = transforms.ConvertImageDtype(torch.float32)(x)
         prediction = model(x)
-    return prediction[0].argmax[0]
+    return prediction[0].argmax()

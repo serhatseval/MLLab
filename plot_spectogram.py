@@ -8,6 +8,8 @@ from datetime import datetime
 import os
 
 rec_dur = 1
+
+
 def plot_user_input(input_path, output_path):
     duration = librosa.get_duration(path=input_path)
     if duration < rec_dur or duration > 20:

@@ -7,15 +7,16 @@ import soundfile as sf
 from datetime import datetime
 import os
 from Decide import load_model, decide 
-from plot_spectogram import plot_user_input
+from plot_spectogram import plot_user_input, main as plt_spc
 
-global model
+model = False
 
 def check_if_allowed():
     return True
 
 class RecorderApp:
     def __init__(self, root):
+        global model
         model = load_model("OutputFiles/model10.pth")
         self.root = root
         self.root.title("Audio Recorder")
@@ -72,22 +73,25 @@ class RecorderApp:
         file_path = os.path.join('recordedaudio', f'recording_{timestamp}.wav')
         sf.write(file_path, audio_np, 44100)  # Assuming a sample rate of 44100 Hz
         print(f"Audio saved to {file_path}")
-        spectogram_path = os.path.join('recordedaudio','spectograms', f'spectogram_{timestamp}.png')
-        plot_user_input(file_path, spectogram_path)
-        print(f"Spectogram saved to {spectogram_path}")
-        result = decide(file_path, spectogram_path)
-        os.remove(file_path)
-        os.remove(spectogram_path)
-        self.update_label(result)
+        # spectogram_path = os.path.join('recordedaudio','spectograms', f'spectogram_{timestamp}.png')
+        spectrogram_path = os.path.join('OutputFiles2', f'recording_{timestamp}_i1.png')
+        plt_spc('recordedaudio', f'recording_{timestamp}.wav')
+        print(f"Spectogram saved to {spectrogram_path}")
+        #result = decide(file_path, spectogram_path)
+        #os.remove(file_path)
+        #os.remove(spectogram_path)
+        #self.update_label(result)
 
     def upload_file(self):
+        global model
         file_path = filedialog.askopenfilename(filetypes=[("WAV files", "*.wav")])
         if file_path:
             print(f"Selected file: {file_path}")
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
             spectogram_path = os.path.join('uploadedaudio', f'spectogram_{timestamp}.png')
             plot_user_input(file_path, spectogram_path)
-            result = decide(file_path, spectogram_path)
+            result = decide(spectogram_path, model)
+            print(result)
             self.update_label(result)
 
     def update_label(self, result):
@@ -95,6 +99,7 @@ class RecorderApp:
             self.label.config(text="Not Allowed Category:0")
         elif result == 1:
             self.label.config(text="Allowed Category:1")
+
 
 if __name__ == "__main__":
     root = tk.Tk()
