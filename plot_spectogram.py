@@ -8,17 +8,23 @@ from datetime import datetime
 import os
 
 
-def plot_spectrogram(signal, signal_rate, output_path, interval_index, f, file_name):
+def plot_user_input(input_path, output_path):
+    duration = librosa.get_duration(path=input_path)
+    if duration < 10 or duration > 20:
+        return 0
+    signal, signal_rate = sf.read(input_path, frames=0)
+    start = (duration - 10)*signal_rate//2
+    signal, _ = sf.read(input_path, start=start, frames=signal_rate*10)
     stft = librosa.stft(signal)
     spectrogram = np.abs(stft)
     spectrogram_db = librosa.amplitude_to_db(spectrogram)
-    # plt.figure(figsize=(1025, 862), dpi=1, constrained_layout=True)
-    # plt.axis('off')
-    # img = librosa.display.specshow(spectrogram_db, sr=signal_rate, x_axis=None, y_axis='log', cmap='Grays')
-    # output_path.mkdir(parents=True, exist_ok=True)
-    # timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
-    # f.write(f"{output_path / f'spectrogram_{timestamp}_interval_{interval_index}.png'},1\n")
-    # plt.savefig(output_path / f'spectrogram_{timestamp}_interval_{interval_index}.png')
+    plt.imsave(fname=output_path, arr=spectrogram_db, cmap='gray_r', format='png')
+
+
+def plot_spectrogram(signal, output_path, interval_index, f, file_name):
+    stft = librosa.stft(signal)
+    spectrogram = np.abs(stft)
+    spectrogram_db = librosa.amplitude_to_db(spectrogram)
     plt.imsave(fname=
                f"{output_path / f'{file_name}_i{interval_index}.png'}", arr=spectrogram_db, cmap='gray_r', format='png')
     f.write(f"{output_path / f'{file_name}_i{interval_index}.png'},0\n")
@@ -47,7 +53,7 @@ def main(file_path, file_name):
         print(
             f"Processing interval {i + 1}/{num_intervals}, duration: {len(interval_signal) / signal_rate:.2f} seconds")
         spectrogram_db = plot_spectrogram(
-            interval_signal, signal_rate, pl.Path('OutputFiles/images'), i + 1, f, file_name)
+            interval_signal, pl.Path('OutputFiles/images'), i + 1, f, file_name)
     f.close()
 
 

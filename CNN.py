@@ -16,6 +16,7 @@ img_width = 862
 features = 2
 batch_size = 16
 
+
 class CustomImageDataset(Dataset):
     def __init__(self, annotations_file, img_dir, transform=None, target_transform=None):
         self.img_labels = pd.read_csv(annotations_file)
