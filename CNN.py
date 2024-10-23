@@ -9,6 +9,22 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 import datetime
 
+annotations_file = 'OutputFiles/labels.csv'
+img_dir = './OutputFiles/images'
+img_height = 1025
+img_width = 862
+features = 2
+batch_size = 16
+
+conv_channels_1 = 1
+conv_channels_2 = 1
+conv_channels_3 = 1
+max_pool_kernel_size = 8
+starting_nodes_number = (conv_channels_3 * (img_height // (max_pool_kernel_size * max_pool_kernel_size)) *
+                         (img_width // (max_pool_kernel_size * max_pool_kernel_size)))
+
+epochs = 10
+
 
 class CustomImageDataset(Dataset):
     def __init__(self, annotations_file, img_dir, transform=None, target_transform=None):
@@ -97,15 +113,7 @@ def test(dataloader, model, loss_fn):
           f"Timestamp: {(datetime.datetime.now()-start).total_seconds()//60} minutes from start")
 
 
-
 if __name__ == "__main__":
-    annotations_file = 'OutputFiles/labels.csv'
-    img_dir = './OutputFiles/images'
-    img_height = 1025
-    img_width = 862
-    features = 2
-    batch_size = 16
-
     print("Defining Dataset")
     training_data = CustomImageDataset(annotations_file, img_dir, transform=transforms.ConvertImageDtype(torch.float32),
                                        target_transform=None)
@@ -124,13 +132,6 @@ if __name__ == "__main__":
 
     print(f"Using {device} device")
 
-    conv_channels_1 = 1
-    conv_channels_2 = 1
-    conv_channels_3 = 1
-    max_pool_kernel_size = 8
-    starting_nodes_number = (conv_channels_3 * (img_height // (max_pool_kernel_size * max_pool_kernel_size)) *
-                             (img_width // (max_pool_kernel_size * max_pool_kernel_size)))
-
     model = NeuralNetwork().to(device)
     print(model)
 
@@ -138,7 +139,6 @@ if __name__ == "__main__":
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
 
     start = datetime.datetime.now()
-    epochs = 10
     for t in range(epochs):
         print(f"Epoch {t + 1}\n-------------------------------")
         train(train_dataloader, model, loss_fn, optimizer)
