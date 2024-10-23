@@ -7,18 +7,19 @@ import numpy as np
 from datetime import datetime
 import os
 
-
+rec_dur = 1
 def plot_user_input(input_path, output_path):
     duration = librosa.get_duration(path=input_path)
-    if duration < 10 or duration > 20:
+    if duration < rec_dur or duration > 20:
         return False
-    signal, signal_rate = sf.read(input_path, frames=0)
-    start = (duration - 10)*signal_rate//2
-    signal, _ = sf.read(input_path, start=start, frames=signal_rate*10)
-    stft = librosa.stft(signal)
+    signal, signal_rate = sf.read(input_path)
+    signal, _ = librosa.effects.trim(signal)
+    start = int((signal.__len__()/signal_rate - rec_dur)*signal_rate//2)
+    stft = librosa.stft(signal[start:(start+rec_dur*signal_rate)])
     spectrogram = np.abs(stft)
     spectrogram_db = librosa.amplitude_to_db(spectrogram)
     plt.imsave(fname=output_path, arr=spectrogram_db, cmap='gray_r', format='png')
+    plt.close()
     return True
 
 

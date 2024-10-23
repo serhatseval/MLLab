@@ -69,11 +69,12 @@ class RecorderApp:
         if not os.path.exists('recordedaudio'):
             os.makedirs('recordedaudio')
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
-        file_path = os.path.join('recordedaudio', 'spectograms',f'recording_{timestamp}.png')
+        file_path = os.path.join('recordedaudio', f'recording_{timestamp}.wav')
         sf.write(file_path, audio_np, 44100)  # Assuming a sample rate of 44100 Hz
         print(f"Audio saved to {file_path}")
         spectogram_path = os.path.join('recordedaudio','spectograms', f'spectogram_{timestamp}.png')
         plot_user_input(file_path, spectogram_path)
+        print(f"Spectogram saved to {spectogram_path}")
         result = decide(file_path, spectogram_path)
         os.remove(file_path)
         os.remove(spectogram_path)
