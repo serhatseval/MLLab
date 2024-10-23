@@ -5,14 +5,18 @@ import numpy as np
 import threading
 import soundfile as sf
 from datetime import datetime
-from Test import main as test_main
 import os
+from Decide import load_model, decide 
+from plot_spectogram import plot_user_input
+
+global model
 
 def check_if_allowed():
     return True
 
 class RecorderApp:
     def __init__(self, root):
+        model = load_model("OutputFiles/model10.pth")
         self.root = root
         self.root.title("Audio Recorder")
 
@@ -64,20 +68,25 @@ class RecorderApp:
 
         if not os.path.exists('recordedaudio'):
             os.makedirs('recordedaudio')
-
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
-        file_path = os.path.join('recordedaudio', f'recording_{timestamp}.wav')
+        file_path = os.path.join('recordedaudio', 'spectograms',f'recording_{timestamp}.png')
         sf.write(file_path, audio_np, 44100)  # Assuming a sample rate of 44100 Hz
         print(f"Audio saved to {file_path}")
-
-        result = test_main(file_path)
+        spectogram_path = os.path.join('recordedaudio','spectograms', f'spectogram_{timestamp}.png')
+        plot_user_input(file_path, spectogram_path)
+        result = decide(file_path, spectogram_path)
+        os.remove(file_path)
+        os.remove(spectogram_path)
         self.update_label(result)
 
     def upload_file(self):
         file_path = filedialog.askopenfilename(filetypes=[("WAV files", "*.wav")])
         if file_path:
             print(f"Selected file: {file_path}")
-            result = test_main(file_path)
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
+            spectogram_path = os.path.join('uploadedaudio', f'spectogram_{timestamp}.png')
+            plot_user_input(file_path, spectogram_path)
+            result = decide(file_path, spectogram_path)
             self.update_label(result)
 
     def update_label(self, result):
