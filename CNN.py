@@ -9,13 +9,6 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 import datetime
 
-annotations_file = 'OutputFiles/labels.csv'
-img_dir = './OutputFiles/images'
-img_height = 1025
-img_width = 862
-features = 2
-batch_size = 16
-
 
 class CustomImageDataset(Dataset):
     def __init__(self, annotations_file, img_dir, transform=None, target_transform=None):
@@ -38,22 +31,6 @@ class CustomImageDataset(Dataset):
         return image, label
 
 
-print("Defining Dataset")
-training_data = CustomImageDataset(annotations_file, img_dir, transform=transforms.ConvertImageDtype(torch.float32),
-                                   target_transform=None)
-test_data = CustomImageDataset(annotations_file, img_dir, transform=transforms.ConvertImageDtype(torch.float32),
-                               target_transform=None)
-
-print("Creating DataLoader")
-# Create data loaders.
-train_dataloader = DataLoader(training_data, batch_size=batch_size)
-test_dataloader = DataLoader(test_data, batch_size=batch_size)
-
-for X, y in test_dataloader:
-    print(f"Shape of X [N, C, H, W]: {X.shape}")
-    print(f"Shape of y: {y.shape} {y.dtype}")
-    break
-
 # Get cpu, gpu or mps device for training.
 device = (
     "cuda"
@@ -62,14 +39,6 @@ device = (
     if torch.backends.mps.is_available()
     else "cpu"
 )
-print(f"Using {device} device")
-
-conv_channels_1 = 1
-conv_channels_2 = 1
-conv_channels_3 = 1
-max_pool_kernel_size = 8
-starting_nodes_number = (conv_channels_3 * (img_height // (max_pool_kernel_size*max_pool_kernel_size)) *
-                         (img_width // (max_pool_kernel_size*max_pool_kernel_size)))
 
 
 # Define model
@@ -89,13 +58,6 @@ class NeuralNetwork(nn.Module):
         x = F.relu(self.fc1(x))
         x = self.fc2(x)
         return x
-
-
-model = NeuralNetwork().to(device)
-print(model)
-
-loss_fn = nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
 
 
 def train(dataloader, model, loss_fn, optimizer):
@@ -135,16 +97,56 @@ def test(dataloader, model, loss_fn):
           f"Timestamp: {(datetime.datetime.now()-start).total_seconds()//60} minutes from start")
 
 
-start = datetime.datetime.now()
-epochs = 10
-for t in range(epochs):
-    print(f"Epoch {t+1}\n-------------------------------")
-    train(train_dataloader, model, loss_fn, optimizer)
-    print(f"Epoch {t+1} training finished after {(datetime.datetime.now() - start).total_seconds()//60} minutes from start")
-    test(test_dataloader, model, loss_fn)
-    print(f"Epoch {t+1} testing finished after {(datetime.datetime.now() - start).total_seconds()//60} minutes from start")
-    torch.save(model.state_dict(), f"OutputFiles/model{t+1}.pth")
-    print("Saved!")
 
-print("Done!")
+if __name__ == "__main__":
+    annotations_file = 'OutputFiles/labels.csv'
+    img_dir = './OutputFiles/images'
+    img_height = 1025
+    img_width = 862
+    features = 2
+    batch_size = 16
 
+    print("Defining Dataset")
+    training_data = CustomImageDataset(annotations_file, img_dir, transform=transforms.ConvertImageDtype(torch.float32),
+                                       target_transform=None)
+    test_data = CustomImageDataset(annotations_file, img_dir, transform=transforms.ConvertImageDtype(torch.float32),
+                                   target_transform=None)
+
+    print("Creating DataLoader")
+    # Create data loaders.
+    train_dataloader = DataLoader(training_data, batch_size=batch_size)
+    test_dataloader = DataLoader(test_data, batch_size=batch_size)
+
+    for X, y in test_dataloader:
+        print(f"Shape of X [N, C, H, W]: {X.shape}")
+        print(f"Shape of y: {y.shape} {y.dtype}")
+        break
+
+    print(f"Using {device} device")
+
+    conv_channels_1 = 1
+    conv_channels_2 = 1
+    conv_channels_3 = 1
+    max_pool_kernel_size = 8
+    starting_nodes_number = (conv_channels_3 * (img_height // (max_pool_kernel_size * max_pool_kernel_size)) *
+                             (img_width // (max_pool_kernel_size * max_pool_kernel_size)))
+
+    model = NeuralNetwork().to(device)
+    print(model)
+
+    loss_fn = nn.CrossEntropyLoss()
+    optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
+
+    start = datetime.datetime.now()
+    epochs = 10
+    for t in range(epochs):
+        print(f"Epoch {t + 1}\n-------------------------------")
+        train(train_dataloader, model, loss_fn, optimizer)
+        print(
+            f"Epoch {t + 1} training finished after {(datetime.datetime.now() - start).total_seconds() // 60} minutes from start")
+        test(test_dataloader, model, loss_fn)
+        print(
+            f"Epoch {t + 1} testing finished after {(datetime.datetime.now() - start).total_seconds() // 60} minutes from start")
+        torch.save(model.state_dict(), f"OutputFiles/model{t + 1}.pth")
+        print("Saved!")
+    print("Done!")

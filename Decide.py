@@ -2,11 +2,6 @@ import torch
 from torchvision.io import read_image, ImageReadMode
 from CNN import NeuralNetwork
 
-classes = [
-    "Foe",
-    "Friend"
-]
-
 device = ("cuda" if torch.cuda.is_available()
           else "mps" if torch.backends.mps.is_available()
           else "cpu")
