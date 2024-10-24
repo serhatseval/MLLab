@@ -10,7 +10,7 @@ device = ("cuda" if torch.cuda.is_available()
 
 def load_model(model_path):
     model = NeuralNetwork().to(device)
-    model.load_state_dict(torch.load(model_path, weights_only=True))
+    model.load_state_dict(torch.load(model_path, weights_only=True, map_location=device))
     model.eval()
     return model
 
