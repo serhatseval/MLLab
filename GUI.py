@@ -5,19 +5,16 @@ import numpy as np
 import threading
 import soundfile as sf
 from datetime import datetime
+from Decide import predict_image as decide
 import os
-from Decide import load_model, decide 
-from plot_spectogram import plot_user_input, main as plt_spc
+from Plot_Spectrograms import plot_user_input as plt_spc
 
-model = False
 
 def check_if_allowed():
     return True
 
 class RecorderApp:
     def __init__(self, root):
-        global model
-        model = load_model("OutputFiles/model10.pth")
         self.root = root
         self.root.title("Audio Recorder")
 
@@ -63,36 +60,35 @@ class RecorderApp:
                 sd.sleep(100)
         self.save_audio()
 
+    
+
     def save_audio(self):
+
         audio_np = np.concatenate(self.audio_data, axis=0)
         print("Recording finished, total frames:", len(audio_np))  # Placeholder action
 
-        if not os.path.exists('recordedaudio'):
-            os.makedirs('recordedaudio')
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
-        file_path = os.path.join('recordedaudio', f'recording_{timestamp}.wav')
-        sf.write(file_path, audio_np, 44100)  # Assuming a sample rate of 44100 Hz
+        file_path = os.path.join('UserAudio', f'recording_{timestamp}.wav')
+
+        sf.write(file_path, audio_np, 44100)  
         print(f"Audio saved to {file_path}")
-        # spectogram_path = os.path.join('recordedaudio','spectograms', f'spectogram_{timestamp}.png')
-        spectrogram_path = os.path.join('OutputFiles2', f'recording_{timestamp}_i1.png')
-        plt_spc('recordedaudio', f'recording_{timestamp}.wav')
-        print(f"Spectogram saved to {spectrogram_path}")
-        #result = decide(file_path, spectogram_path)
-        #os.remove(file_path)
-        #os.remove(spectogram_path)
-        #self.update_label(result)
+        self.check(file_path)
 
     def upload_file(self):
         global model
         file_path = filedialog.askopenfilename(filetypes=[("WAV files", "*.wav")])
         if file_path:
             print(f"Selected file: {file_path}")
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
-            spectogram_path = os.path.join('uploadedaudio', f'spectogram_{timestamp}.png')
-            plot_user_input(file_path, spectogram_path)
-            result = decide(spectogram_path, model)
-            print(result)
-            self.update_label(result)
+        self.check(file_path)
+            
+    def check(self, file_path):
+        global model
+        plt_spc(file_path,"UserAudio/Spectrograms")
+        result = decide("UserAudio/Spectrograms/user_input.png")
+        print(result)
+        self.update_label(result)
+        os.remove("UserAudio/Spectrograms/user_input.png")
+
 
     def update_label(self, result):
         if result == 0:

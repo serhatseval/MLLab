@@ -1,18 +1,19 @@
 import os
+import re
 import pandas as pd
+import torch
+import torch.nn as nn
 import torch.nn.functional as F
 from torchvision.io import read_image, ImageReadMode
-import torch
-from torch import nn, Tensor
-from torch.utils.data import Dataset
-from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
+from torch.utils.data import Dataset, DataLoader
 import datetime
 
+
 annotations_file = 'OutputFiles/labels.csv'
-img_dir = './OutputFiles/images'
+img_dir = 'OutputFiles/images'
 img_height = 1025
-img_width = 862
+img_width = 259 #Length for 3 seconds of audio
 features = 2
 batch_size = 16
 
@@ -37,7 +38,7 @@ class CustomImageDataset(Dataset):
         return len(self.img_labels)
 
     def __getitem__(self, idx):
-        img_path = os.path.join(self.img_dir, self.img_labels.iloc[idx, 0])
+        img_path = os.path.join(self.img_labels.iloc[idx, 0])
         image = read_image(img_path, mode=ImageReadMode.GRAY)
         label = self.img_labels.iloc[idx, 1]
         if self.transform:
@@ -49,13 +50,10 @@ class CustomImageDataset(Dataset):
 
 # Get cpu, gpu or mps device for training.
 device = (
-    "cuda"
-    if torch.cuda.is_available()
-    else "mps"
-    if torch.backends.mps.is_available()
+    "cuda" if torch.cuda.is_available()
+    else "mps" if torch.backends.mps.is_available()
     else "cpu"
 )
-
 
 # Define model
 class NeuralNetwork(nn.Module):

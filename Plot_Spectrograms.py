@@ -5,23 +5,37 @@ import pathlib as pl
 import librosa
 import numpy as np
 from datetime import datetime
+import noisereduce as nr
+import pandas as pd
 import os
 
-rec_dur = 1
 
 
 def plot_user_input(input_path, output_path):
+    rec_dur = 10
     duration = librosa.get_duration(path=input_path)
-    if duration < rec_dur or duration > 20:
+    
+    if duration < rec_dur:
         return False
+    
     signal, signal_rate = sf.read(input_path)
     signal, _ = librosa.effects.trim(signal)
-    start = int((signal.__len__()/signal_rate - rec_dur)*signal_rate//2)
-    stft = librosa.stft(signal[start:(start+rec_dur*signal_rate)])
+    
+
+    if duration > rec_dur:
+        start = int((len(signal) / signal_rate - rec_dur) * signal_rate // 2)
+        signal = signal[start:start + rec_dur * signal_rate]
+        
+    reduced_noise = nr.reduce_noise(signal, sr=signal_rate)
+
+    stft = librosa.stft(reduced_noise)
     spectrogram = np.abs(stft)
     spectrogram_db = librosa.amplitude_to_db(spectrogram)
-    plt.imsave(fname=output_path, arr=spectrogram_db, cmap='gray_r', format='png')
+    
+    final_output_path = os.path.join(output_path,"user_input.png")
+    plt.imsave(fname=final_output_path, arr=spectrogram_db, cmap='gray_r', format='png')
     plt.close()
+    
     return True
 
 
@@ -31,22 +45,33 @@ def plot_spectrogram(signal, output_path, interval_index, f, file_name):
     spectrogram_db = librosa.amplitude_to_db(spectrogram)
     plt.imsave(fname=
                f"{output_path / f'{file_name}_i{interval_index}.png'}", arr=spectrogram_db, cmap='gray_r', format='png')
-    f.write(f"{output_path / f'{file_name}_i{interval_index}.png'},0\n")
+    f.write(f"{output_path / f'{file_name}_i{interval_index}.png'},1\n")
     plt.close()
     return spectrogram_db
 
 
 def main(file_path, file_name):
+
     joined_path = str(os.path.join(file_path, file_name))
     print(f"Original audio duration: {librosa.get_duration(path=joined_path)} seconds")
     signal, signal_rate = sf.read(joined_path)
     f = open("OutputFiles/labels.csv", "a")
     # Trim silence
-    signal, _ = librosa.effects.trim(signal)
+    signal, _ = librosa.effects.trim(signal, top_db=20)
     print(f"Audio duration after trimming silence: {len(signal) / signal_rate:.2f} seconds")
+    non_silent_intervals = librosa.effects.split(signal, top_db=20)
+    processed_segments = []
+    for start, end in non_silent_intervals:
+        segment = signal[start:end]
+        processed_segments.append(segment)
+    signal = np.concatenate(processed_segments)  # Combine segments
 
-    # Split into 10-second intervals
-    interval_duration = 10 * signal_rate
+    reduced_noise = nr.reduce_noise(signal, sr=signal_rate)
+    signal = reduced_noise
+    print(f"Audio duration after reducing noise: {len(signal) / signal_rate:.2f} seconds")
+
+    #Split into 3-second intervals
+    interval_duration = 3 * signal_rate
     num_intervals = int(np.floor(len(signal) / interval_duration))
 
     for i in range(num_intervals):
