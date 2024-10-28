@@ -12,7 +12,7 @@ import os
 
 
 def plot_user_input(input_path, output_path):
-    rec_dur = 10
+    rec_dur = 3
     duration = librosa.get_duration(path=input_path)
     
     if duration < rec_dur:
@@ -45,7 +45,7 @@ def plot_spectrogram(signal, output_path, interval_index, f, file_name):
     spectrogram_db = librosa.amplitude_to_db(spectrogram)
     plt.imsave(fname=
                f"{output_path / f'{file_name}_i{interval_index}.png'}", arr=spectrogram_db, cmap='gray_r', format='png')
-    f.write(f"{output_path / f'{file_name}_i{interval_index}.png'},1\n")
+    f.write(f"{output_path / f'{file_name}_i{interval_index}.png'},0\n")
     plt.close()
     return spectrogram_db
 
@@ -55,7 +55,7 @@ def main(file_path, file_name):
     joined_path = str(os.path.join(file_path, file_name))
     print(f"Original audio duration: {librosa.get_duration(path=joined_path)} seconds")
     signal, signal_rate = sf.read(joined_path)
-    f = open("OutputFiles/labels.csv", "a")
+    f = open("OutputTrial2/Clean/labels.csv", "a")
     # Trim silence
     signal, _ = librosa.effects.trim(signal, top_db=20)
     print(f"Audio duration after trimming silence: {len(signal) / signal_rate:.2f} seconds")
@@ -82,7 +82,7 @@ def main(file_path, file_name):
         print(
             f"Processing interval {i + 1}/{num_intervals}, duration: {len(interval_signal) / signal_rate:.2f} seconds")
         spectrogram_db = plot_spectrogram(
-            interval_signal, pl.Path('OutputFiles/images'), i + 1, f, file_name)
+            interval_signal, pl.Path('OutputTrial2/Clean/images'), i + 1, f, file_name)
     f.close()
 
 

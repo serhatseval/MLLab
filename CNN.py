@@ -1,5 +1,4 @@
 import os
-import re
 import pandas as pd
 import torch
 import torch.nn as nn
@@ -9,18 +8,21 @@ from torchvision import datasets, transforms
 from torch.utils.data import Dataset, DataLoader
 import datetime
 
+# Paths to the annotation files and image directories
+train_annotations_file = 'OutputTrial2/CNN/labels.csv'
+train_img_dir = 'OutputTrial2/CNN/images'
+test_annotations_file = 'OutputTrial2/Clean/labels.csv'
+test_img_dir = 'OutputTrial2/Clean/images'
 
-annotations_file = 'OutputFiles/labels.csv'
-img_dir = 'OutputFiles/images'
 img_height = 1025
-img_width = 259 #Length for 3 seconds of audio
+img_width = 259  # Length for 3 seconds of audio
 features = 2
 batch_size = 16
 
 conv_channels_1 = 1
 conv_channels_2 = 1
 conv_channels_3 = 1
-max_pool_kernel_size = 8
+max_pool_kernel_size = 2
 starting_nodes_number = (conv_channels_3 * (img_height // (max_pool_kernel_size * max_pool_kernel_size)) *
                          (img_width // (max_pool_kernel_size * max_pool_kernel_size)))
 
@@ -38,7 +40,7 @@ class CustomImageDataset(Dataset):
         return len(self.img_labels)
 
     def __getitem__(self, idx):
-        img_path = os.path.join(self.img_labels.iloc[idx, 0])
+        img_path = os.path.join(self.img_labels.iloc[idx, 0])  # Corrected path
         image = read_image(img_path, mode=ImageReadMode.GRAY)
         label = self.img_labels.iloc[idx, 1]
         if self.transform:
@@ -72,6 +74,7 @@ class NeuralNetwork(nn.Module):
         x = F.relu(self.fc1(x))
         x = self.fc2(x)
         return x
+
 
 
 def train(dataloader, model, loss_fn, optimizer):
@@ -113,9 +116,9 @@ def test(dataloader, model, loss_fn):
 
 if __name__ == "__main__":
     print("Defining Dataset")
-    training_data = CustomImageDataset(annotations_file, img_dir, transform=transforms.ConvertImageDtype(torch.float32),
+    training_data = CustomImageDataset(train_annotations_file, train_img_dir, transform=transforms.ConvertImageDtype(torch.float32),
                                        target_transform=None)
-    test_data = CustomImageDataset(annotations_file, img_dir, transform=transforms.ConvertImageDtype(torch.float32),
+    test_data = CustomImageDataset(test_annotations_file, test_img_dir, transform=transforms.ConvertImageDtype(torch.float32),
                                    target_transform=None)
 
     print("Creating DataLoader")
@@ -133,13 +136,21 @@ if __name__ == "__main__":
     model = NeuralNetwork().to(device)
     print(model)
 
-    loss_fn = nn.CrossEntropyLoss()
+    # Calculate class weights
+    class_counts = training_data.img_labels.iloc[:, 1].value_counts().sort_index()
+    class_weights = 1. / class_counts
+    class_weights = class_weights / class_weights.sum()  # Normalize weights
+    class_weights = torch.tensor(class_weights.values, dtype=torch.float32).to(device)
+
+    if len(class_weights) == 1:
+        class_weights = torch.tensor([1.0, 1.0], dtype=torch.float32).to(device)  # Ensure weights for both classes
+
+    loss_fn = nn.CrossEntropyLoss(weight=class_weights)
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
 
     start = datetime.datetime.now()
     for t in range(epochs):
         print(f"Epoch {t + 1}\n-------------------------------")
-        train(train_dataloader, model, loss_fn, optimizer)
         print(
             f"Epoch {t + 1} training finished after {(datetime.datetime.now() - start).total_seconds() // 60}"
             f"minutes from start")

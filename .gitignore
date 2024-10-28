@@ -164,3 +164,7 @@ cython_debug/
 AudioFiles/
 OutputFiles/images
 .DS_Store
+OutputFiles/
+AudioClean/
+OutputFilesMarta/
+OutputTrial2/
