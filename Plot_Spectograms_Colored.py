@@ -4,9 +4,6 @@ import soundfile as sf
 import pathlib as pl
 import librosa
 import numpy as np
-from datetime import datetime
-import noisereduce as nr
-import pandas as pd
 import os
 
 
@@ -26,7 +23,7 @@ def main(file_path, file_name):
     
     # Determine the output directory based on the filename's starting identifiers
     identifier = file_name[:3] if file_name[:2].isdigit() else file_name[:2]
-    output_dir = pl.Path(f'OutputFilesMarta/{identifier}')
+    output_dir = pl.Path(f'ColoredSpectrograms/{identifier}')
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Plot and save the spectrogram

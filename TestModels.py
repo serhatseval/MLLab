@@ -13,7 +13,7 @@ import seaborn as sns
 # Paths to the annotation files and image directories
 test_annotations_file = 'OutputFilesSeperated/Clean/labels.csv'
 test_img_dir = 'OutputFilesSeperated/Clean/images'
-model_dir = 'OutputFiles'  # Directory where models are saved
+model_dir = 'Models/ToTest'  # Directory where models are saved
 results_dir = 'Models/TestResults'  # Directory to save the results
 
 img_height = 1025
