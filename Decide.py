@@ -21,11 +21,11 @@ model = create_model()
 
 # Load the model weights
 try:
-    model.load_state_dict(torch.load("OutputFiles/model_fold1.pth", map_location=device))
+    model.load_state_dict(torch.load("Models/model_fold1.pth", map_location=device))
 except RuntimeError as e:
     print(f"Error loading model: {e}")
     # Optionally, try partial load
-    state_dict = torch.load("OutputFiles/model_fold1.pth", map_location=device)
+    state_dict = torch.load("Models/model_fold1.pth", map_location=device)
     model.load_state_dict({k: v for k, v in state_dict.items() if k in model.state_dict()})
 
 model.eval()

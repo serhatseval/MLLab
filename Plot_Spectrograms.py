@@ -92,4 +92,3 @@ if __name__ == '__main__':
     parser.add_argument('audiofile_name', type=str, help='Name of the audio file')
     args = parser.parse_args()
     main(args.audiofile, args.audiofile_name)
-    # main("C:\\Users\\Marcel\\Desktop\\IML\\daps\\daps\\ClipsForCNN\\ipad_balcony1", "f1_script5_ipad_balcony1.wav")

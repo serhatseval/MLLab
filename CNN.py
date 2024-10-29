@@ -9,10 +9,10 @@ from torch.utils.data import Dataset, DataLoader
 import datetime
 
 # Paths to the annotation files and image directories
-train_annotations_file = 'OutputTrial2/CNN/labels.csv'
-train_img_dir = 'OutputTrial2/CNN/images'
-test_annotations_file = 'OutputTrial2/Clean/labels.csv'
-test_img_dir = 'OutputTrial2/Clean/images'
+train_annotations_file = 'OutputFilesSeperated/CNN/labels.csv'
+train_img_dir = 'OutputFilesSeperated/CNN/images'
+test_annotations_file = 'OutputFilesSeperated/Clean/labels.csv'
+test_img_dir = 'OutputFilesSeperated/Clean/images'
 
 img_height = 1025
 img_width = 259  # Length for 3 seconds of audio
@@ -158,6 +158,6 @@ if __name__ == "__main__":
         print(
             f"Epoch {t + 1} testing finished after {(datetime.datetime.now() - start).total_seconds() // 60}"
             f"minutes from start")
-        torch.save(model.state_dict(), f"OutputFiles/model{t + 1}.pth")
+        torch.save(model.state_dict(), f"Models/model{t + 1}.pth")
         print("Saved!")
     print("Done!")
