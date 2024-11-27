@@ -168,3 +168,12 @@ OutputFiles/
 AudioClean/
 ColoredSpectrograms/
 OutputFilesSeperated/
+OutputFilesSeperated.zip
+ColoredSpectrograms_MEL/
+ColoredSpectrograms_MEL_NoiseReduced/
+MEL_Spectograms/
+ColoredSpectrograms_MEL/
+OutputFilesS/
+UserAudio/
+.Rproj.user
+/MEL Spectograms and Labels

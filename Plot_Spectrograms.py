@@ -28,26 +28,36 @@ def plot_user_input(input_path, output_path):
         
     reduced_noise = nr.reduce_noise(signal, sr=signal_rate)
 
-    stft = librosa.stft(reduced_noise)
-    spectrogram = np.abs(stft)
-    spectrogram_db = librosa.amplitude_to_db(spectrogram)
+    mel_spectrogram = librosa.feature.melspectrogram(y=reduced_noise, sr=signal_rate, n_mels=128, fmax=8000)
+    mel_spectrogram_db = librosa.power_to_db(mel_spectrogram, ref=np.max)
     
-    final_output_path = os.path.join(output_path,"user_input.png")
-    plt.imsave(fname=final_output_path, arr=spectrogram_db, cmap='gray_r', format='png')
+    final_output_path = os.path.join(output_path, "user_input.png")
+    plt.imsave(fname=final_output_path, arr=mel_spectrogram_db, cmap='gray_r', format='png')
     plt.close()
     
     return True
 
 
 def plot_spectrogram(signal, output_path, interval_index, f, file_name):
-    stft = librosa.stft(signal)
-    spectrogram = np.abs(stft)
-    spectrogram_db = librosa.amplitude_to_db(spectrogram)
-    plt.imsave(fname=
-               f"{output_path / f'{file_name}_i{interval_index}.png'}", arr=spectrogram_db, cmap='gray_r', format='png')
-    f.write(f"{output_path / f'{file_name}_i{interval_index}.png'},0\n")
+    # Compute the Mel spectrogram
+    mel_spectrogram = librosa.feature.melspectrogram(y=signal, sr=44100, n_mels=128, fmax=8000)
+    mel_spectrogram_db = librosa.power_to_db(mel_spectrogram, ref=np.max)
+
+    # Save the Mel spectrogram as an image without title and borders
+    plt.figure(figsize=(10, 4))
+    plt.axis('off')  # Remove axes
+    plt.margins(0, 0)  # Remove margins
+    plt.gca().set_axis_off()  # Remove axis lines
+    plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)  # Remove padding
+    plt.gcf().set_size_inches(10, 4)  # Set figure size
+    librosa.display.specshow(mel_spectrogram_db, sr=44100, x_axis='time', y_axis='mel', fmax=8000, cmap='gray_r')
+    plt.savefig(f"{output_path / f'{file_name}_i{interval_index}.png'}", bbox_inches='tight', pad_inches=0, format='png')
     plt.close()
-    return spectrogram_db
+
+    # Write the file path to the output file
+    f.write(f"{output_path / f'{file_name}_i{interval_index}.png'},0\n")  # Change it to 1 when it's creating allowed class
+
+    return mel_spectrogram_db
 
 
 def main(file_path, file_name):
@@ -55,7 +65,7 @@ def main(file_path, file_name):
     joined_path = str(os.path.join(file_path, file_name))
     print(f"Original audio duration: {librosa.get_duration(path=joined_path)} seconds")
     signal, signal_rate = sf.read(joined_path)
-    f = open("OutputTrial2/Clean/labels.csv", "a")
+    f = open("MEL_Spectograms/labels.csv", "a")
     # Trim silence
     signal, _ = librosa.effects.trim(signal, top_db=20)
     print(f"Audio duration after trimming silence: {len(signal) / signal_rate:.2f} seconds")
@@ -82,7 +92,7 @@ def main(file_path, file_name):
         print(
             f"Processing interval {i + 1}/{num_intervals}, duration: {len(interval_signal) / signal_rate:.2f} seconds")
         spectrogram_db = plot_spectrogram(
-            interval_signal, pl.Path('OutputTrial2/Clean/images'), i + 1, f, file_name)
+            interval_signal, pl.Path('MEL_Spectograms/images'), i + 1, f, file_name)
     f.close()
 
 

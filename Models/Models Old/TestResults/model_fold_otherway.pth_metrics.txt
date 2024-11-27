@@ -1,0 +1,9 @@
+Test - Accuracy: 0.9024, Avg Loss: 0.2357, F1 Score: 0.8528
+Test - Confusion Matrix:
+[[3579  534]
+ [  30 1634]]
+
+Train - Accuracy: 0.3380, Avg Loss: 6.4631, F1 Score: 0.4677
+Train - Confusion Matrix:
+[[ 1815 25411]
+ [   41 11181]]
