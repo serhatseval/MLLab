@@ -1,0 +1,1 @@
+For spectrograms, ask Serhat to send you the spectrograms. He has all the spectrograms stored however its over 40 gb hence can't upload it to Github.
