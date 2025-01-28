@@ -168,12 +168,13 @@ if __name__ == "__main__":
         scheduler.step()
         print(f"Validation Loss: {val_loss:.4f}, Accuracy: {accuracy:.4f}, F1 Score: {f1_score:.4f}")
 
-    torch.save(model.state_dict(), f"Models/model_under95.pth")
+        # Save the model after each epoch
+        torch.save(model.state_dict(), f"Models/Final/model_epoch_{epoch + 1}.pth")
 
     train_loss, train_accuracy, train_f1, train_cm = validate(train_dataloader, model, loss_fn)
     test_loss, test_accuracy, test_f1, test_cm = validate(test_dataloader, model, loss_fn)
 
-    save_results("Train_Results_under95.txt", train_accuracy, train_loss, train_f1, train_cm)
-    save_results("Test_Results_under95.txt", test_accuracy, test_loss, test_f1, test_cm)
+    save_results("Train_Results_under95_final.txt", train_accuracy, train_loss, train_f1, train_cm)
+    save_results("Test_Results_under95_final.txt", test_accuracy, test_loss, test_f1, test_cm)
 
     print("Done!")

@@ -24,7 +24,7 @@ class RecorderApp:
 
         self.allowed = check_if_allowed()
 
-        self.label = tk.Label(root, text="Allowed" if self.allowed else "Not Allowed", font=("Arial", 14))
+        self.label = tk.Label(root, text="Upload or Record audio", font=("Arial", 14))
         self.label.pack(pady=20)
 
         self.record_button = tk.Button(root, text="Start Recording", command=self.toggle_recording, width=20)
@@ -41,11 +41,14 @@ class RecorderApp:
         if not self.is_recording:
             self.is_recording = True
             self.record_button.config(text="Stop Recording")
+            self.audio_data = []  # Clear the audio data list at the start of each recording
             self.recording_thread = threading.Thread(target=self.record_audio)
             self.recording_thread.start()
         else:
             self.is_recording = False
             self.record_button.config(text="Start Recording")
+            self.recording_thread.join()  # Wait for the recording thread to finish
+            threading.Thread(target=self.save_and_process_audio).start()  # Start a new thread to save and process the audio
 
     def record_audio(self):
         # Function to capture audio
@@ -58,14 +61,10 @@ class RecorderApp:
         with sd.InputStream(callback=callback):
             while self.is_recording:
                 sd.sleep(100)
-        self.save_audio()
 
-    
-
-    def save_audio(self):
-
+    def save_and_process_audio(self):
         audio_np = np.concatenate(self.audio_data, axis=0)
-        print("Recording finished, total frames:", len(audio_np))  # Placeholder action
+        print("Recording finished, total frames:", len(audio_np)) 
 
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
         file_path = os.path.join('UserAudio', f'recording_{timestamp}.wav')
@@ -79,7 +78,7 @@ class RecorderApp:
         file_path = filedialog.askopenfilename(filetypes=[("WAV files", "*.wav")])
         if file_path:
             print(f"Selected file: {file_path}")
-        self.check(file_path)
+            threading.Thread(target=self.check, args=(file_path,)).start()  # Start a new thread to process the uploaded file
             
     def check(self, file_path):
         global model
@@ -89,12 +88,13 @@ class RecorderApp:
         self.update_label(result)
         os.remove("UserAudio/Spectrograms/user_input.png")
 
-
     def update_label(self, result):
         if result == 0:
             self.label.config(text="Not Allowed Category:0")
         elif result == 1:
             self.label.config(text="Allowed Category:1")
+        elif result == 2:
+            self.label.config(text="Invalid input")
 
 
 if __name__ == "__main__":

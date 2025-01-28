@@ -11,8 +11,6 @@ import os
 import random
 
 
-
-
 def time_masking(mel_spectrogram_db, max_mask_percentage=0.2):
     time_steps = mel_spectrogram_db.shape[1]
     mask_size = int(time_steps * max_mask_percentage)

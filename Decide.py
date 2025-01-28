@@ -9,7 +9,7 @@ img_height = 1000
 img_width = 400  # Length for 3 seconds of audio
 features = 2
 
-our_model = 'Models/Eliminating Files over 95% Similarity/model_under95.pth'
+our_model = 'Models/Eliminating Files over 95% Similarity Epoch Saving/model_epoch_10.pth'
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -34,10 +34,13 @@ model.eval()
 
 
 def predict_image(image_path):
+    if not os.path.exists(image_path):
+        print(f"Spectrogram file does not exist: {image_path}")
+        return 2
+    
     image = read_image(image_path, mode=ImageReadMode.GRAY)
     
     transform = transforms.Compose([
-        transforms.Resize((img_height, img_width)), 
         transforms.ConvertImageDtype(torch.float32),
         transforms.Normalize(mean=[0.5], std=[0.5])
     ])

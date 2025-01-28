@@ -8,38 +8,62 @@ from datetime import datetime
 import noisereduce as nr
 import pandas as pd
 import os
+import random
 
 
 
 def plot_user_input(input_path, output_path):
-    rec_dur = 3
+    rec_dur = 3  # Fixed duration of 3 seconds
+    target_sr = 44100  # Fixed sampling rate
+    n_mels = 128  # Number of Mel bands
+    fmax = 8000  # Maximum frequency for the Mel spectrogram
+    img_width = 1000  
+    img_height = 400  
+    
+    # Get audio duration
     duration = librosa.get_duration(path=input_path)
-    
     if duration < rec_dur:
+        print("Audio too short for analysis.")
         return False
-    
-    signal, signal_rate = sf.read(input_path)
-    signal, _ = librosa.effects.trim(signal)
-    
 
-    if duration > rec_dur:
-        start = int((len(signal) / signal_rate - rec_dur) * signal_rate // 2)
-        signal = signal[start:start + rec_dur * signal_rate]
-        
-    reduced_noise = nr.reduce_noise(signal, sr=signal_rate)
+    # Load and preprocess the audio signal
+    signal, original_sr = sf.read(input_path)
+    signal = librosa.resample(signal, orig_sr=original_sr, target_sr=target_sr)  # Resample to target_sr
+    signal, _ = librosa.effects.trim(signal)  # Trim silence
 
-    mel_spectrogram = librosa.feature.melspectrogram(y=reduced_noise, sr=signal_rate, n_mels=128, fmax=8000)
+    # Extract 3-second segment if longer
+    if len(signal) > rec_dur * target_sr:
+        max_start = len(signal) - rec_dur * target_sr
+        start = random.randint(0, max_start)
+        signal = signal[start:start + rec_dur * target_sr]
+    elif len(signal) < rec_dur * target_sr:
+        # Pad with zeros if shorter (edge case handling)
+        pad_length = rec_dur * target_sr - len(signal)
+        signal = np.pad(signal, (0, pad_length), 'constant')
+
+    # Reduce noise
+    reduced_noise = nr.reduce_noise(y=signal, sr=target_sr)
+
+    # Create Mel spectrogram
+    mel_spectrogram = librosa.feature.melspectrogram(y=reduced_noise, sr=target_sr, n_mels=n_mels, fmax=fmax)
     mel_spectrogram_db = librosa.power_to_db(mel_spectrogram, ref=np.max)
-    
+
+    # Save the spectrogram as a fixed-size image
     final_output_path = os.path.join(output_path, "user_input.png")
-    plt.imsave(fname=final_output_path, arr=mel_spectrogram_db, cmap='gray_r', format='png')
+    plt.figure(figsize=(img_width / 100, img_height / 100))  # Convert pixel dimensions to inches (dpi=100)
+    plt.axis('off')  # Remove axes
+    plt.margins(0, 0)
+    plt.gca().set_axis_off()
+    plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)  # Remove padding
+    librosa.display.specshow(mel_spectrogram_db, sr=target_sr, x_axis='time', y_axis='mel', fmax=fmax, cmap='gray_r')
+    plt.savefig(final_output_path, bbox_inches='tight', pad_inches=0, dpi=100)
     plt.close()
-    
+
+    print(f"Saved spectrogram: {final_output_path}")
     return True
 
 
 def plot_spectrogram(signal, output_path, interval_index, f, file_name):
-    # Compute the Mel spectrogram
     mel_spectrogram = librosa.feature.melspectrogram(y=signal, sr=44100, n_mels=128, fmax=8000)
     mel_spectrogram_db = librosa.power_to_db(mel_spectrogram, ref=np.max)
 
