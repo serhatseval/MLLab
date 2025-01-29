@@ -24,7 +24,7 @@ class RecorderApp:
 
         self.allowed = check_if_allowed()
 
-        self.label = tk.Label(root, text="Allowed" if self.allowed else "Not Allowed", font=("Arial", 14))
+        self.label = tk.Label(root, text="Record or Upload" if self.allowed else "Not Allowed", font=("Arial", 14))
         self.label.pack(pady=20)
 
         self.record_button = tk.Button(root, text="Start Recording", command=self.toggle_recording, width=20)
@@ -55,7 +55,7 @@ class RecorderApp:
             self.audio_data.append(indata.copy())
 
         # Start recording with the sounddevice library
-        with sd.InputStream(callback=callback):
+        with sd.InputStream(callback=callback, channels=1):
             while self.is_recording:
                 sd.sleep(100)
         self.save_audio()

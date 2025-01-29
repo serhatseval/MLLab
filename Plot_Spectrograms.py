@@ -9,8 +9,7 @@ import noisereduce as nr
 import pandas as pd
 import os
 import random
-
-
+import librosa.display
 
 def plot_user_input(input_path, output_path):
     rec_dur = 3  # Fixed duration of 3 seconds
@@ -29,18 +28,29 @@ def plot_user_input(input_path, output_path):
     # Load and preprocess the audio signal
     signal, original_sr = sf.read(input_path)
     signal = librosa.resample(signal, orig_sr=original_sr, target_sr=target_sr)  # Resample to target_sr
-    signal, _ = librosa.effects.trim(signal)  # Trim silence
+
+    # Trim leading and trailing silence
+    signal, _ = librosa.effects.trim(signal)
+
+    # Split the signal into non-silent intervals and concatenate them
+    non_silent_intervals = librosa.effects.split(signal, top_db=20)
+    processed_segments = []
+    for start, end in non_silent_intervals:
+        segment = signal[start:end]
+        processed_segments.append(segment)
+    signal = np.concatenate(processed_segments)  # Combine segments
+
+    # Check if the concatenated signal is less than 3 seconds
+    if len(signal) < rec_dur * target_sr:
+        print("Concatenated audio too short for analysis.")
+        return False
 
     # Extract 3-second segment if longer
     if len(signal) > rec_dur * target_sr:
         max_start = len(signal) - rec_dur * target_sr
         start = random.randint(0, max_start)
         signal = signal[start:start + rec_dur * target_sr]
-    elif len(signal) < rec_dur * target_sr:
-        # Pad with zeros if shorter (edge case handling)
-        pad_length = rec_dur * target_sr - len(signal)
-        signal = np.pad(signal, (0, pad_length), 'constant')
-
+        
     # Reduce noise
     reduced_noise = nr.reduce_noise(y=signal, sr=target_sr)
 
@@ -61,8 +71,6 @@ def plot_user_input(input_path, output_path):
 
     print(f"Saved spectrogram: {final_output_path}")
     return True
-
-
 def plot_spectrogram(signal, output_path, interval_index, f, file_name):
     mel_spectrogram = librosa.feature.melspectrogram(y=signal, sr=44100, n_mels=128, fmax=8000)
     mel_spectrogram_db = librosa.power_to_db(mel_spectrogram, ref=np.max)
