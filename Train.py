@@ -1,7 +1,7 @@
 # import required module
 import os
 import re
-from Plot_Spectrogram_Masking import main
+from Plot_Spectrograms import main
 
 # assign directory
 directory = "AudioFiles"
