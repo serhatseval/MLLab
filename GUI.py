@@ -24,7 +24,7 @@ class RecorderApp:
 
         self.allowed = check_if_allowed()
 
-        self.label = tk.Label(root, text="Upload or Record Audio" if self.allowed else "Not Allowed", font=("Arial", 14))
+        self.label = tk.Label(root, text="Allowed" if self.allowed else "Not Allowed", font=("Arial", 14))
         self.label.pack(pady=20)
 
         self.record_button = tk.Button(root, text="Start Recording", command=self.toggle_recording, width=20)
@@ -95,8 +95,6 @@ class RecorderApp:
             self.label.config(text="Not Allowed Category:0")
         elif result == 1:
             self.label.config(text="Allowed Category:1")
-        elif result == 2:
-            self.label.config(text="Invalid Input")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,4 @@
+Accuracy: 0.9497
+Confusion Matrix:
+[[6662  477]
+ [  26 2835]]

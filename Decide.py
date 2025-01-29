@@ -9,7 +9,7 @@ img_height = 1000
 img_width = 400  # Length for 3 seconds of audio
 features = 2
 
-our_model = 'Models/Eliminating Files over 95% Similarity Epoch Saving/model_epoch_10.pth'
+our_model = 'Required files For GUI/model/model_epoch_9.pth'
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
