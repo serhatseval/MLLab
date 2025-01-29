@@ -1,0 +1,4 @@
+Accuracy: 0.9160, Avg Loss: 0.2332, F1 Score: 0.8567
+Confusion Matrix:
+[[4055  466]
+ [  46 1531]]
