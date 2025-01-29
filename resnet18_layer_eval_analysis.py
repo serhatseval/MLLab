@@ -1,4 +1,3 @@
-import datetime
 import os
 import torch
 import torchvision
@@ -156,7 +155,7 @@ if __name__ == '__main__':
     scripts = ["2"]
     recorders = ["ipad_office2"]
     parts = ["7", "10"]
-
+    images = ""
     for person in persons:
         for script in scripts:
             for recorder in recorders:
