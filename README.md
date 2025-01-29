@@ -20,3 +20,6 @@ For results and Models please refer to folder 'Models'
 
 Please refer to "resnet18_layer_eval_analysis.py" and "resnet18_parameter_space_analysis.py" Pruning mentioned in the jupyter notebook
 
+## UI 
+
+For UI please refer to https://wutwaw-my.sharepoint.com/:f:/g/personal/01183013_pw_edu_pl/Es4Pz74ckH9Brlj6cZvMLG8B7dOWzknO3JMWbyB80U9qAw?e=b90yDc . Run it through terminal
