@@ -61,42 +61,47 @@ def dict_elementwise_diff(dict1, dict2):
 
 
 if __name__ == '__main__':
-    modelFullPath = "Models\\Time Mask 20%\\model_timemask.pth"
-    modelName = "TimeMask20"
-    imagePath = "MEL_Spectograms_TimeMasking_20\\images"
-    # imageName = "m3_script1_ipad_balcony1.wav_i15.png"
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    activation = {}
     img_height = 1000
     img_width = 400  # Length for 3 seconds of audio
     features = 2
 
-    sd = get_state_dict(modelFullPath)
-
-    partialPath = "Models\\pruned\\model_epoch_"
+    partialPath = "Models\\Eliminating Files over 95% Similarity Epoch Saving\\model_epoch_"
 
     sd2 = get_state_dict(partialPath + "1.pth")
     vd2 = get_val_dicts(sd2)
 
     arr_abs = np.zeros([5, 9])
     arr_rel = np.zeros([5, 9])
-    text = [0]*9
+    to_epoch = [0] * 9
     for n in range(2, 11):
         sd1 = sd2
         vd1 = vd2
         sd2 = get_state_dict(partialPath + str(n) + ".pth")
         vd2 = get_val_dicts(sd2)
-        text[n-2] = n
+        to_epoch[n - 2] = n
         for i in range(5):
             temp = dict_elementwise_diff(vd1[i], vd2[i])
             arr_abs[i][n-2] = temp[0]
             arr_rel[i][n-2] = temp[1]
 
-    print(arr_abs)
-    print(arr_rel)
-
-    plt.plot(text, arr_abs.transpose())
+    plt.plot(to_epoch, arr_abs.transpose())
+    plt.title("Absolute differences compared to previous epoch")
+    plt.xlabel("Epoch")
+    plt.ylabel("Absolute difference")
     plt.legend(["conv weights", "norm weights", "norm biases", "downsample weight", "downsample biases"], bbox_to_anchor=(1.04, 1), loc="upper left")
     plt.yscale('log')
     plt.tight_layout()
     plt.show()
+
+    plt.plot(to_epoch, arr_rel.transpose())
+    plt.title("Relative differences compared to previous epoch")
+    plt.xlabel("Epoch")
+    plt.ylabel("Relative difference")
+    plt.legend(["conv weights", "norm weights", "norm biases", "downsample weight", "downsample biases"],
+               bbox_to_anchor=(1.04, 1), loc="upper left")
+    plt.yscale('log')
+    plt.tight_layout()
+    plt.show()
+
+
