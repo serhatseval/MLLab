@@ -14,4 +14,9 @@ We had an experiment with comparing scripts that can be found at 'Counting Words
 For model creation please refer to ML.ipynb 
 
 ## Results
-For results and Models please refer to folder 'Models
+For results and Models please refer to folder 'Models'
+
+## Extra Tasks
+
+Please refer to "resnet18_layer_eval_analysis.py" and "resnet18_parameter_space_analysis.py" Pruning mentioned in the jupyter notebook
+
